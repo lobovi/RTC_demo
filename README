@@ -1,0 +1,46 @@
+ABOUT
+
+This is a demo kernel module which demontrates my skills  in creating KLM.
+Module intented to emulating rtc device. Time represent in epoch unix
+seconds. Module was testing on 3.16.0-4-amd64 kernel only.
+
+Principle:
+    * Time parameters(secs, usecs) inits by current system time.
+    * Main thread wait 1 second after that incrementing time parameters on
+      1 * speed/speed_factor value. Speed_factor = 100, defined in sources.
+    * If random mode on increment changes to 1 * rand_speed/speed_facror.
+      Where random_speed takes from range equals [0:random_bound].
+
+Parameters of module is:
+@param time_sec - unix seconds. Inits from system clock.
+@param time_usec- useconds. Inits form system clock.
+@param speed          - speed of time flow in module. Values of speed begins 
+                        at 100, it means 100 - normal flow, like system 
+                        clock, if speed greater - time flow in that module
+                        accelerated, if lesser slowing down.
+@param random         - if non-zero, current time ascending by increment
+                        makes from @random-bound param, interprets like  
+                        high border of range of possible values of speed.
+@param random-bound   - high border range of possible values of speed in
+                        random time mode. Low border is 0.
+
+Module could be inserted and removed from kernel space dinamically. 
+Module registers in file /dev/rtcN you can interoperate with it by hwclock
+utility. 
+Module have interface with userspace in /proc/rtcmodule. You may passing
+parameters by string commands:
+"s [value]" - sets speed to value; value must be non-negative
+"r [value]" - sets random mode if value is non-zero, disable random mode
+              otherwise.
+"b [value]" - sets high border of distribution range of speed for random mode.
+"t [value]" - sets epoch time secs in module.
+"u [value]" - sets epoch time usecs in module.
+
+Or reading from that file. outputed:
+  Module uptime.
+  Difference between sys clock. (Negative means rtc module time ahead sys clock.)
+  Speed.
+  Random. 1 means on, 0 off.
+  Random bound.
+  Secs.
+  Usecs.
